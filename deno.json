@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/denoland/deno/refs/heads/main/cli/schemas/config-file.v1.json",
+  "nodeModulesDir": "none",
+  "lock": false,
+  "tasks": {
+    "fmt": "deno fmt",
+    "fmt:check": "deno fmt --check",
+    "lint": "deno lint",
+    "check": "deno check scripts/*.ts skills/engineering/wizard/*.ts skills/engineering/diagnosing-bugs/scripts/*.ts skills/misc/git-guardrails-claude-code/scripts/*.ts",
+    "test": "deno test --allow-read --allow-write --allow-env --allow-run",
+    "ok": "deno task fmt:check && deno task lint && deno task check && deno task test"
+  },
+  "fmt": {
+    "include": ["deno.json", "scripts/**/*.ts", "skills/**/*.ts"]
+  },
+  "lint": {
+    "include": ["scripts/**/*.ts", "skills/**/*.ts"]
+  },
+  "test": {
+    "include": ["scripts/**/*_test.ts", "skills/**/*_test.ts"]
+  }
+}

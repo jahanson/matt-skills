@@ -35,6 +35,10 @@ Phase 1 gets disproportionate effort because it is the only phase that is hard. 
 9. A differential loop: same input, old version against new.
 10. A [human-in-the-loop](https://www.aihero.dev/ai-coding-dictionary/human-in-the-loop) bash script, last resort. The skill ships `scripts/hitl-loop.template.sh` for this: the agent runs the script, you follow prompts in your terminal, and your answers come back as parseable output.
 
+An adjacent Deno template provides the same prompt loop on Windows and Linux. It needs Deno 2.9 or newer and runs with
+`deno run <copied-script.ts>`. Interactive Windows use also needs `--allow-run=chcp.com` to handle Unicode input and restore
+the console encoding afterward; other runs need no permission flags. Both templates remain available.
+
 *A* loop is not the goal. **Tight** is: fast (seconds), deterministic (same verdict every run), sharp (asserts your exact symptom, not "didn't crash"), and agent-runnable unattended. A 30-second flaky loop is barely better than none. For a bug that only shows up sometimes, the target is not a clean repro but a **higher reproduction rate**: loop the trigger, parallelise, add stress, inject sleeps, until the flake rate is high enough to debug against.
 
 When it genuinely cannot build one, it is instructed to stop and say so, list what it tried, and ask you for [environment](https://www.aihero.dev/ai-coding-dictionary/environment) access, a captured artifact, or permission to add temporary instrumentation. It should not proceed to hypothesise anyway.

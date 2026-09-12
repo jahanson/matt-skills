@@ -34,6 +34,12 @@ Copy it to the target location based on scope:
 
 Make it executable with `chmod +x`.
 
+Alternatively, copy [scripts/block-dangerous-git.ts](scripts/block-dangerous-git.ts) to the same location with a `.ts`
+extension. This version needs Deno 2.9 or newer and `jq` on `PATH`, and does not need `chmod`. Use
+`deno run --no-prompt --allow-run=jq "<absolute-path>/block-dangerous-git.ts"` as the settings `command` below.
+Use a JSON-escaped absolute path, including on Windows; keep the `Bash` matcher. The Deno version preserves the existing
+patterns and exit codes. A `jq` error does not itself reject a command, and missing `jq` retains the original exit 0.
+
 ### 3. Add hook to settings
 
 Add to the appropriate settings file:

@@ -2,6 +2,9 @@
 
 `wizard` generates an interactive bash script that walks a human, step by step, through a manual procedure: wiring up third-party services, running a one-off migration, moving a project from state A to state B. It opens each URL, says what to click and copy, captures what comes back, and writes it into `.env` files and GitHub Actions secrets.
 
+Bash remains the default. An adjacent Deno TypeScript template provides the same procedure for users who prefer Deno,
+including native Windows use without Bash.
+
 The [agent](https://www.aihero.dev/ai-coding-dictionary/agent) writes the script; it never runs it. You do, on your own machine. So a wizard is not a list of instructions you follow; it is a program that drives the procedure and holds the state, and your part is to click, paste, and press Enter.
 
 ## When to reach for it
@@ -21,7 +24,19 @@ Don't reach for it to *decide* what to build; for that, [grill-with-docs](https:
 
 ## Prerequisites
 
-None to generate one. The wizard it writes runs on bash, and uses `gh` when a stage sets a GitHub secret or variable. If `gh` is missing or unauthenticated, that stage becomes a warning and the closing summary tells you what to set by hand, instead of failing the run.
+None to generate one. Choose the runtime for the generated wizard:
+
+- **Default:** Bash, using the existing shell template.
+- **Deno alternative:** Deno, using
+  [template.ts](https://github.com/mattpocock/skills/blob/main/skills/engineering/wizard/template.ts). Run the copied file
+  with `deno run --allow-env --allow-read --allow-write --allow-run <script.ts>`. Permissions cover environment settings,
+  local `.env` access and temporary writes, and external commands; Deno network permission is unnecessary.
+
+Both use `gh` when a stage sets a GitHub secret or variable. If `gh` is missing or unauthenticated, that stage becomes a
+warning and the closing summary tells you what to set by hand, instead of failing the run. Browser opening uses installed
+platform commands. `tput` is optional for styling; without it, output is uncolored and terminal clearing uses ANSI.
+Interactive Windows input uses the built-in `chcp.com` command to select UTF-8 temporarily and restore the previous
+console encoding afterward.
 
 ## Stages
 
@@ -44,6 +59,10 @@ For each captured value, scoping settles where it lands:
 The [template](https://github.com/mattpocock/skills/blob/main/skills/engineering/wizard/template.sh) ships the whole experience: progress with time remaining, confirmation gates, cross-platform URL opening including WSL, hidden entry for secrets, idempotent `.env` upserts, `gh secret` / `gh variable` writes, and a closing summary of everything it had to skip. Everything above the `STAGES` marker is a fixed library, identical in every wizard and never hand-edited. The consistency is the point. Your job is only to scope the procedure and author its stages.
 
 The agent that writes a wizard never runs it end to end, because it opens browsers and waits for human input. It verifies statically instead: `bash -n`, `shellcheck` where available, and a trace that every value lands where scoping said it would, with every `set_secret` name matching a real `secrets.*` reference in CI. Set your expectations accordingly: the first run is yours, and that run is the test.
+
+The Deno alternative keeps the same fixed-library and authored-`STAGES` contract. Its `Wizard` methods await input and
+external operations, and captured values are returned as strings. Generated Deno wizards receive `deno fmt --check`,
+`deno lint`, and `deno check` verification plus the same static trace of values and destinations.
 
 ## Ephemeral by default
 
@@ -74,7 +93,7 @@ Nowhere in particular. It's a standalone, not a chain step. The common guess is 
 
 **Does it work outside Claude Code?**
 
-The artifact does, unconditionally: it's a plain bash script and it doesn't care what [harness](https://www.aihero.dev/ai-coding-dictionary/harness) generated it. The skill itself is model-invoked, so it's listed everywhere: type `/wizard` in Claude Code or `$wizard` in Codex, or just describe the setup you're stuck on. Being model-invoked also keeps it clear of [#693](https://github.com/mattpocock/skills/issues/693), where Claude's desktop and web surfaces drop *user-invoked* skills from the [model](https://www.aihero.dev/ai-coding-dictionary/model)'s listing and report them as not installed.
+The artifact does: the standalone Bash or Deno script doesn't care what [harness](https://www.aihero.dev/ai-coding-dictionary/harness) generated it, provided its runtime is installed. The skill itself is model-invoked, so it's listed everywhere: type `/wizard` in Claude Code or `$wizard` in Codex, or just describe the setup you're stuck on. Being model-invoked also keeps it clear of [#693](https://github.com/mattpocock/skills/issues/693), where Claude's desktop and web surfaces drop *user-invoked* skills from the [model](https://www.aihero.dev/ai-coding-dictionary/model)'s listing and report them as not installed.
 
 **Didn't this used to be user-invoked?**
 
